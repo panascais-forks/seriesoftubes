@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The project follows
 
 ## [Unreleased]
 
+- New SubCalm Abyss 800 transponder for the longest routes: 800G per channel up to 13,000 km and 400G anywhere on Earth, for $400k per channel (#22). Subsea cables have no regen sites, so very long ones like Auckland to Los Angeles need it, and the cable order now warns you before you pay.
 - Your own subsea cable now runs beside the existing cable on its route instead of looping far out to sea (#64). Leased and own fiber next to a busy trench no longer swing out in giant loops either, on any route.
 - Loans got stranger, and good ones got harder to get. Your credit rating now adds a
   risk premium to the interest rate, the big banks only lend to strong ratings, and a

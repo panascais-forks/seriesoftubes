@@ -435,3 +435,29 @@ test('#22 Tier 1 networks can lay their own subsea cable', () => {
   assert.match(ev("ownCabWhy('sha','sea')"), /China/);
   assert.deepEqual(errors, []);
 });
+
+test('#22 a subsea cable beyond transponder reach needs the subsea optic, not regen sites', () => {
+  const { ev, errors } = load();
+  ev("ACT.start({});S.cash=1e10;S.lvl=4;S.won=true;for(const g of GOALS)S.done[g.id]=0;ACT.launchBB({city:'fra'});ACT.buildPop({city:'lax'});S.pops.lax.rgen=3;compute()");
+  ev("UI.lmode='df';UI.via=null;openLinkModal('lax','akl');ACT.ownCab()");
+  assert.match(ev("document.getElementById('modalCard').textContent"), /Only the SubCalm Abyss 800 reaches across/, 'the order warns before you pay');
+  ev('ACT.orderCable()');
+  const l = "S.links.find(l=>l.own&&l.sub)";
+  assert.ok(ev(`${l}.km`) > 12000, 'longer than the slowest Sienna mode');
+  ev(`S.day=${l}.ready;S.pops.akl.rgen=3;compute()`);
+  const why = ev(`chWhy(${l},'tp16')`);
+  assert.match(why, /no regen sites under the sea/, 'the transponder does not reach');
+  assert.doesNotMatch(why, /Add a regen site/);
+  assert.equal(ev(`chWhy(${l},'sub8')`), '', 'the subsea optic does');
+  const c0 = ev('S.cash');
+  ev(`ACT.addCh({id:${l}.id,o:'sub8'});compute()`);
+  assert.ok(c0 - ev('S.cash') >= 400000, 'and costs a fortune');
+  assert.equal(ev(`dfCap(${l})`), 800, '800G across the Pacific');
+  assert.equal(ev("optG('sub8',{km:20000,regen:0})"), 400, 'slower, but it gets anywhere');
+  // a leased fiber pair on someone else's cable offers no regen buttons either
+  ev("S.links.push({id:'iru',a:'lax',b:'akl',kind:'df',sub:true,km:13000,sys:'roadm',ch:[],ready:0,mo:1000,day:0,cut:0});ACT.selLink({id:'iru'})");
+  const body = ev("document.getElementById('panelBody').innerHTML");
+  assert.match(body, /repeaters only amplify the light/);
+  assert.doesNotMatch(body, /data-act="regen"/);
+  assert.deepEqual(errors, []);
+});
